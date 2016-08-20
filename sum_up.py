@@ -29,9 +29,10 @@ class FrequencySummarizer:
         Further work could be done to address this.
     """
 
-    def __init__(self, min_frequency=0.1, max_frequency=0.9):
+    def __init__(self, min_frequency=0.1, max_frequency=0.9, max_length_sentences=140):
         self.min_frequency = min_frequency
         self.max_frequency = max_frequency
+        self.max_length_sentences = max_length_sentences
         self.common_words = set(stopwords.words('english') + list(punctuation))
 
     def _is_frequency_neglectable(self, frequency):
@@ -78,11 +79,12 @@ class FrequencySummarizer:
     def summarize(self, text, summary_length):
         """
             First, we tokenize the text. Sentences, then words.
+            We eventually filter out long sentences (e.g. for twitter use)
             Second, we compute the word frequency
             Third, we rank the sentences with their word frequency
             Finally, we retrieve the highest ranked sentences.
         """
-        sentences = sent_tokenize(text)
+        sentences = [sentence for sentence in sent_tokenize(text) if len(sentence) < self.max_length_sentences]
         assert summary_length <= len(sentences)
         tokenized_text = [word_tokenize(sentence.lower()) for sentence in sentences]
 
@@ -95,6 +97,5 @@ class FrequencySummarizer:
 
 if __name__ == '__main__':
     summarizer = FrequencySummarizer(min_frequency=0.05, max_frequency=0.95)
-    text = """#my text to summarize"""
-    for s in summarizer.summarize(text, 2):
-        print(s)
+    text = """#my text to summarize. This is a bumb test. Nothing here."""
+    print(summarizer.summarize(text, 2))
