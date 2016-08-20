@@ -11,45 +11,41 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 
 
 class FrequencySummarizer:
-    """
-        The idea is to generate a summarizer from a given text based on
-        the analysis of words frequency.
-
-        Parameters used: min_frequency & max_frequency
-        Words that have a frequency term lower 'freq' such as:
-            freq < min_frequency or freq > max_frequency
-        will be ignored.
-
-        Note: If you have a few very long sentences...
-        With a lot of keywords in it...
-        They will be for sure in your summary and sometimes,
-        it's not what you're expect.
-        You can end up with an example which is not the core of your article
-        you want to summarize.
-        Further work could be done to address this.
+    """The idea is to generate a summarizer from a given text based on
+    the analysis of words frequency.
     """
 
     def __init__(self, min_frequency=0.1, max_frequency=0.9, max_length_sentences=140):
+        """Args:
+            min_frequency (float, optional):
+                Parameter to tune used to filter out too uncommon words.
+                Default: 0.1
+            max_frequency (float, optional):
+                Parameter to tune used to filter out too common words
+                Default: 0.9
+            max_length_sentences (int, optional): default to 140 for twitter
+                This could help to filter sentence for twitter use or also to
+                filter out long sentences which can contains too many keywords
+                and give weird summary.
+
+        Words that have a frequency term 'f' such as:
+            f < min_frequency or f > max_frequency
+        will be ignored.
+        """
         self.min_frequency = min_frequency
         self.max_frequency = max_frequency
         self.max_length_sentences = max_length_sentences
         self.common_words = set(stopwords.words('english') + list(punctuation))
 
     def _is_frequency_neglectable(self, frequency):
-        """
-            We filter out too common or uncommon words.
-            Note: min_frequency and max_frequency are set empirically.
-        """
         return frequency >= self.max_frequency or frequency <= self.min_frequency
 
     def _compute_words_frequency(self, tokenized_text):
-        """
-            Compute the frequency of each words.
-            @param
-            tokenized_text: a list of sentences already tokenized.
+        """Args:
+            tokenized_text (list): a list of sentences already tokenized (words)
 
-            Output:
-            frequency, a frequency dictionary for each word.
+        Returns:
+            (dict) a frequency dictionary for each word.
         """
         frequency = defaultdict(int)
         for sentence in tokenized_text:
@@ -77,12 +73,11 @@ class FrequencySummarizer:
         return ranking
 
     def summarize(self, text, summary_length):
-        """
-            First, we tokenize the text. Sentences, then words.
-            We eventually filter out long sentences (e.g. for twitter use)
-            Second, we compute the word frequency
-            Third, we rank the sentences with their word frequency
-            Finally, we retrieve the highest ranked sentences.
+        """First, we tokenize the text. Sentences, then words.
+        We eventually filter out long sentences (e.g. for twitter use)
+        Second, we compute the word frequency
+        Third, we rank the sentences with their word frequency
+        Finally, we retrieve the highest ranked sentences.
         """
         sentences = [sentence for sentence in sent_tokenize(text) if len(sentence) < self.max_length_sentences]
         assert summary_length <= len(sentences)
