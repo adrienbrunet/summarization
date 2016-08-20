@@ -10,7 +10,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 
 
-class FrequencySummarizer:
+class FrequencySummarizer(object):
     """Summarize a given text based on the analysis of words frequency."""
 
     def __init__(self, min_frequency=0.1, max_frequency=0.9, max_length_sentences=140):
@@ -70,7 +70,7 @@ class FrequencySummarizer:
                     ranking[counter] += words_frequency[word]
         return ranking
 
-    def summarize(self, text, summary_length):
+    def get_best_sentences(self, text, sentences_nb=1):
         """First, we tokenize the text. Sentences, then words.
         We eventually filter out long sentences (e.g. for twitter use)
         Second, we compute the word frequency
@@ -78,17 +78,22 @@ class FrequencySummarizer:
         Finally, we retrieve the highest ranked sentences.
         """
         sentences = [sentence for sentence in sent_tokenize(text) if len(sentence) < self.max_length_sentences]
-        assert summary_length <= len(sentences)
+        assert sentences_nb <= len(sentences)
         tokenized_text = [word_tokenize(sentence.lower()) for sentence in sentences]
 
         words_frequency = self._compute_words_frequency(tokenized_text)
 
         ranking = self._rank_sentences(tokenized_text, words_frequency)
 
-        return [sentences[j] for j in nlargest(summary_length, ranking, key=ranking.get)]
+        return [sentences[j] for j in nlargest(sentences_nb, ranking, key=ranking.get)]
+
+    def summarize(self, text, summary_length):
+        best_sentences = self.get_best_sentences(text, sentences_nb=summary_length)
+        return '\n'.join(best_sentences)
 
 
 if __name__ == '__main__':
     summarizer = FrequencySummarizer(min_frequency=0.05, max_frequency=0.95)
     text = """#my text to summarize. This is a bumb test. Nothing here."""
+    print(summarizer.get_best_sentences(text, sentences_nb=2))
     print(summarizer.summarize(text, 2))
