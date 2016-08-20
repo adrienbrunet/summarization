@@ -11,16 +11,14 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 
 
 class FrequencySummarizer:
-    """The idea is to generate a summarizer from a given text based on
-    the analysis of words frequency.
-    """
+    """Summarize a given text based on the analysis of words frequency."""
 
     def __init__(self, min_frequency=0.1, max_frequency=0.9, max_length_sentences=140):
         """Args:
-            min_frequency (float, optional):
+            min_frequency (float, optional): 0 < value < 1
                 Parameter to tune used to filter out too uncommon words.
                 Default: 0.1
-            max_frequency (float, optional):
+            max_frequency (float, optional): 0 < value < 1
                 Parameter to tune used to filter out too common words
                 Default: 0.9
             max_length_sentences (int, optional): default to 140 for twitter
